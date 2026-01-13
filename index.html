@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Normandin Systems | Demo Gallery</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Google Font (Inter) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .fade-in { animation: fadeIn 0.5s ease-out; }
+        .slide-up { animation: slideUp 0.4s ease-out; }
+        .shake { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both; }
+        
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0); } 40%, 60% { transform: translate3d(4px, 0, 0); } }
+
+        /* Card Hover Effects */
+        .demo-card { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        .demo-card:hover { 
+            transform: translateY(-4px); 
+            box-shadow: 0 12px 24px -8px rgba(30, 58, 138, 0.15); 
+            border-color: #93c5fd;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col">
+
+    <!-- ACCESS LOCK SCREEN -->
+    <div id="lock-screen" class="fixed inset-0 z-[100] bg-slate-900 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl text-center slide-up">
+            <div class="w-16 h-16 bg-slate-100 text-slate-900 rounded-full flex items-center justify-center mx-auto mb-6">
+                <i data-lucide="lock" class="w-8 h-8"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-slate-900 mb-2">Restricted Access</h2>
+            <p class="text-slate-500 mb-6">This portal is for Normandin Systems internal sales staff only.</p>
+            
+            <form onsubmit="checkAccess(event)" class="space-y-4">
+                <input type="password" id="access-pin" placeholder="Enter Access PIN" class="w-full text-center text-2xl tracking-widest p-3 border border-slate-300 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 transition-all" autofocus>
+                <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition-colors flex items-center justify-center gap-2">
+                    <span>Unlock Portal</span>
+                    <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                </button>
+            </form>
+            <p class="mt-4 text-xs text-slate-400"></p>
+        </div>
+    </div>
+
+    <!-- MAIN APP (Hidden by default) -->
+    <div id="app-content" class="hidden flex-col min-h-screen">
+        
+        <!-- Navbar -->
+        <nav class="bg-white border-b border-slate-200 sticky top-0 z-50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between h-16 items-center">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 bg-blue-900 text-white flex items-center justify-center font-bold rounded-lg shadow-sm">NS</div>
+                        <div>
+                            <span class="font-bold text-slate-800 block leading-none">Normandin Systems</span>
+                            <span class="text-[10px] text-slate-500 font-medium tracking-wide uppercase">Sales Portal</span>
+                        </div>
+                    </div>
+                    <button onclick="lockPortal()" class="text-xs text-slate-400 hover:text-red-500 flex items-center gap-1">
+                        <i data-lucide="lock" class="w-3 h-3"></i> Lock
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+            
+            <!-- Hero / Search Section -->
+            <div class="bg-blue-900 text-white rounded-2xl p-8 mb-6 relative overflow-hidden shadow-xl slide-up">
+                <div class="relative z-10 max-w-2xl">
+                    <h1 class="text-3xl font-bold mb-3">Interactive Demo Portfolio</h1>
+                    <p class="text-blue-100 mb-6 text-lg">Select a vertical below to launch the interactive customer demo environment.</p>
+                    
+                    <!-- Search Bar -->
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i data-lucide="search" class="w-5 h-5 text-slate-400 group-focus-within:text-blue-600 transition-colors"></i>
+                        </div>
+                        <input 
+                            type="text" 
+                            id="searchInput"
+                            placeholder="Search demos (e.g., 'Pizza', 'Mechanic', 'Auto')..." 
+                            class="w-full pl-11 pr-4 py-4 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-blue-500/30 shadow-lg font-medium transition-all"
+                            oninput="renderGallery(this.value)"
+                        />
+                    </div>
+                </div>
+                
+                <!-- Decorative Elements -->
+                <div class="absolute right-0 top-0 h-full w-1/3 bg-gradient-to-l from-blue-600/30 to-transparent skew-x-12 transform translate-x-12 pointer-events-none"></div>
+                <div class="absolute -bottom-24 -right-12 w-64 h-64 bg-blue-500 rounded-full mix-blend-overlay filter blur-3xl opacity-20 pointer-events-none"></div>
+            </div>
+
+            <!-- Sales Guide Toggle -->
+            <div class="mb-10 slide-up" style="animation-delay: 0.1s">
+                <button onclick="toggleGuide()" class="flex items-center gap-2 text-slate-500 font-bold hover:text-blue-600 transition-colors mb-4 focus:outline-none group">
+                    <i data-lucide="info" class="w-5 h-5 text-blue-500"></i>
+                    <span>View Sales Cheat Sheet & Commission</span>
+                    <i id="guide-chevron" data-lucide="chevron-down" class="w-4 h-4 transition-transform group-hover:translate-y-0.5"></i>
+                </button>
+                
+                <div id="sales-guide" class="hidden bg-white rounded-2xl border border-slate-200 shadow-lg overflow-hidden transition-all duration-300">
+                    <!-- Banner: Price & Commission -->
+                    <div class="bg-slate-900 text-white p-6 grid md:grid-cols-2 gap-6 items-center">
+                        <div>
+                            <h2 class="text-2xl font-bold text-white mb-1">The "Business Card" Website</h2>
+                            <p class="text-slate-400 text-sm">Standard Flat-Rate Package</p>
+                        </div>
+                        <div class="flex flex-col sm:flex-row gap-4 sm:items-center md:justify-end">
+                            <div class="bg-blue-600/20 border border-blue-500/30 rounded-lg p-3 px-5">
+                                <div class="text-xs text-blue-200 uppercase font-bold tracking-wider">Client Price</div>
+                                <div class="text-2xl font-bold text-white">$500 <span class="text-sm font-normal text-blue-200">/Year</span></div>
+                            </div>
+                            <div class="bg-green-600/20 border border-green-500/30 rounded-lg p-3 px-5">
+                                <div class="text-xs text-green-200 uppercase font-bold tracking-wider">Your Commission</div>
+                                <div class="text-2xl font-bold text-green-400">$250 <span class="text-sm font-normal text-green-200">/Sale</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-8 grid lg:grid-cols-3 gap-8 text-sm">
+                        
+                        <!-- What It Is -->
+                        <div>
+                            <h3 class="font-bold text-slate-900 text-lg mb-4 flex items-center gap-2">
+                                <div class="w-2 h-2 rounded-full bg-green-500"></div>
+                                What It Is (Sell This)
+                            </h3>
+                            <p class="text-slate-500 mb-4 italic">"Digital Business Card" - Designed to get the customer to call or visit. Note: We can customize some features within reason, I can speak directly to your prospect in that case if they want more images or a gallery, more service cards, etc.</p>
+                            <ul class="space-y-3">
+                                <li class="flex items-start gap-2">
+                                    <i data-lucide="check-circle-2" class="w-4 h-4 text-green-600 mt-0.5 shrink-0"></i>
+                                    <span class="text-slate-600"><strong>1-Page "Scroll":</strong> Modern, clean, fast.</span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <i data-lucide="check-circle-2" class="w-4 h-4 text-green-600 mt-0.5 shrink-0"></i>
+                                    <span class="text-slate-600"><strong>Hero Section:</strong> Big photo + "Call Now".</span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <i data-lucide="check-circle-2" class="w-4 h-4 text-green-600 mt-0.5 shrink-0"></i>
+                                    <span class="text-slate-600"><strong>Essentials:</strong> About text, Services list, Gallery (10 photos).</span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <i data-lucide="check-circle-2" class="w-4 h-4 text-green-600 mt-0.5 shrink-0"></i>
+                                    <span class="text-slate-600"><strong>Contact:</strong> Map embed, Phone, Address.</span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <i data-lucide="check-circle-2" class="w-4 h-4 text-green-600 mt-0.5 shrink-0"></i>
+                                    <span class="text-slate-600"><strong>Mobile Optimized:</strong> Perfect for phones.</span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <i data-lucide="check-circle-2" class="w-4 h-4 text-green-600 mt-0.5 shrink-0"></i>
+                                    <span class="text-slate-600"><strong>"Order" Button:</strong> Links to UberEats/Skip.</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <!-- What It Is NOT -->
+                        <div>
+                            <h3 class="font-bold text-slate-900 text-lg mb-4 flex items-center gap-2">
+                                <div class="w-2 h-2 rounded-full bg-red-500"></div>
+                                What It Is NOT (No)
+                            </h3>
+                            <p class="text-slate-500 mb-4 italic">If a client asks for these, the answer is NO.</p>
+                            <ul class="space-y-3">
+                                <li class="flex items-start gap-2">
+                                    <i data-lucide="x-circle" class="w-4 h-4 text-red-500 mt-0.5 shrink-0"></i>
+                                    <span class="text-slate-600"><strong>No Online Payments:</strong> We don't build carts.</span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <i data-lucide="x-circle" class="w-4 h-4 text-red-500 mt-0.5 shrink-0"></i>
+                                    <span class="text-slate-600"><strong>No Custom Ordering:</strong> We link to 3rd party apps (Uber/Skip/DoorDash).</span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <i data-lucide="x-circle" class="w-4 h-4 text-red-500 mt-0.5 shrink-0"></i>
+                                    <span class="text-slate-600"><strong>No Logins:</strong> No client portals/passwords.</span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <i data-lucide="x-circle" class="w-4 h-4 text-red-500 mt-0.5 shrink-0"></i>
+                                    <span class="text-slate-600"><strong>No Content Writing:</strong> Client provides text (Note: We can create the text ourselves if the client is too busy, doesn't have the time and we can edit it later on.)</span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <i data-lucide="x-circle" class="w-4 h-4 text-red-500 mt-0.5 shrink-0"></i>
+                                    <span class="text-slate-600"><strong>No Logo Design:</strong> Must have own logo.</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <!-- Targets -->
+                        <div class="bg-slate-50 rounded-xl p-5 border border-slate-100 h-fit">
+                            <h3 class="font-bold text-slate-900 text-lg mb-4 flex items-center gap-2">
+                                <i data-lucide="target" class="w-5 h-5 text-blue-600"></i>
+                                Who to Target
+                            </h3>
+                            
+                            <div class="space-y-4 mb-6">
+                                <div class="flex gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-lg shrink-0">👻</div>
+                                    <div>
+                                        <div class="font-bold text-slate-800 text-xs uppercase">The Ghost</div>
+                                        <div class="text-slate-600 text-xs">No website at all.</div>
+                                    </div>
+                                </div>
+                                <div class="flex gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-lg shrink-0">🏚️</div>
+                                    <div>
+                                        <div class="font-bold text-slate-800 text-xs uppercase">The Broken</div>
+                                        <div class="text-slate-600 text-xs">"Not Secure" or broken on mobile.</div>
+                                    </div>
+                                </div>
+                                <div class="flex gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-lg shrink-0">🦖</div>
+                                    <div>
+                                        <div class="font-bold text-slate-800 text-xs uppercase">The Ugly</div>
+                                        <div class="text-slate-600 text-xs">Looks like it was built in 1998.</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="pt-4 border-t border-slate-200">
+                                <div class="font-bold text-slate-800 text-xs uppercase mb-2">Top Industries</div>
+                                <div class="flex flex-wrap gap-2">
+                                    <span class="bg-white border border-slate-200 px-2 py-1 rounded text-xs text-slate-500">Mechanics</span>
+                                    <span class="bg-white border border-slate-200 px-2 py-1 rounded text-xs text-slate-500">Detailers</span>
+                                    <span class="bg-white border border-slate-200 px-2 py-1 rounded text-xs text-slate-500">Pizza Shops</span>
+                                    <span class="bg-white border border-slate-200 px-2 py-1 rounded text-xs text-slate-500">Landscapers</span>
+                                    <span class="bg-white border border-slate-200 px-2 py-1 rounded text-xs text-slate-500">Renovators</span>
+                                    <span class="bg-white border border-slate-200 px-2 py-1 rounded text-xs text-slate-500">Tire Shops</span>
+                                    <span class="bg-white border border-slate-200 px-2 py-1 rounded text-xs text-slate-500">Dentists</span>
+                                    <span class="bg-white border border-slate-200 px-2 py-1 rounded text-xs text-slate-500">Pawn Shops</span>
+                                    <span class="bg-white border border-slate-200 px-2 py-1 rounded text-xs text-slate-500">Fireworks</span>
+                                    <span class="bg-white border border-slate-200 px-2 py-1 rounded text-xs text-slate-500">Monuments</span>
+                                    <span class="bg-white border border-slate-200 px-2 py-1 rounded text-xs text-slate-500">Funeral Homes</span>
+                                    <span class="bg-white border border-slate-200 px-2 py-1 rounded text-xs text-slate-500">Snow Removal</span>
+                                    <span class="bg-white border border-slate-200 px-2 py-1 rounded text-xs text-slate-500">Roofers</span>
+                                    <span class="bg-white border border-slate-200 px-2 py-1 rounded text-xs text-slate-500">Pressure Washers</span>
+                                    <span class="bg-white border border-slate-200 px-2 py-1 rounded text-xs text-slate-500">Churches</span>
+                                    <span class="bg-white border border-slate-200 px-2 py-1 rounded text-xs text-slate-500">Garage Door</span>
+                                    <span class="bg-white border border-slate-200 px-2 py-1 rounded text-xs text-slate-500">Arborists</span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Grid Container -->
+            <div id="gallery-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-12">
+                <!-- Cards will be injected here by JS -->
+            </div>
+
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-white border-t border-slate-200 mt-auto">
+            <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4">
+                <div class="text-sm text-slate-500">© 2026 Normandin Systems. Internal Sales Use Only.</div>
+                <div class="flex gap-6 text-slate-400">
+                    <i data-lucide="shield-check" class="w-5 h-5"></i>
+                    <i data-lucide="lock" class="w-5 h-5"></i>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Logic -->
+    <script>
+        // --- 0. SECURITY ---
+        const PIN = "1337";
+        
+        function checkAccess(e) {
+            e.preventDefault();
+            const input = document.getElementById('access-pin');
+            
+            if (input.value === PIN) {
+                localStorage.setItem('ns_access_granted', 'true');
+                unlockUI();
+            } else {
+                input.value = '';
+                input.classList.add('border-red-500', 'shake');
+                setTimeout(() => input.classList.remove('border-red-500', 'shake'), 500);
+            }
+        }
+
+        function unlockUI() {
+            document.getElementById('lock-screen').classList.add('hidden');
+            const app = document.getElementById('app-content');
+            app.classList.remove('hidden');
+            app.classList.add('flex'); // restore flex layout
+            // We can safely call renderGallery now because the function and data are defined below
+            renderGallery(); 
+        }
+
+        function lockPortal() {
+            localStorage.removeItem('ns_access_granted');
+            location.reload();
+        }
+
+        // --- 1. DATA: The Master List of Demos ---
+        const DEMO_SITES = [
+            { name: 'Garage Door Service', url: 'https://normandinsystems.github.io/garage-door-demo-example/', icon: 'warehouse', tags: ['home', 'repair'] },
+            { name: 'Home Renovation', url: 'https://normandinsystems.github.io/reno-demo-example/', icon: 'hammer', tags: ['construction', 'home'] },
+            { name: 'Tire Shop', url: 'https://normandinsystems.github.io/tire-shop-demo-example/', icon: 'circle-dot', tags: ['auto', 'repair'] },
+            { name: 'General Contractor', url: 'https://normandinsystems.github.io/gen-contractor-demo-example/', icon: 'hard-hat', tags: ['construction', 'commercial'] },
+            { name: 'Community Church', url: 'https://normandinsystems.github.io/church-demo-example/', icon: 'church', tags: ['community', 'non-profit'] },
+            { name: 'Security Systems', url: 'https://normandinsystems.github.io/security-demo-example/', icon: 'shield-check', tags: ['tech', 'safety'] },
+            { name: 'Funeral Home', url: 'https://normandinsystems.github.io/funeral-home-demo-example/', icon: 'flower-2', tags: ['service', 'care'] },
+            { name: 'Plumbing Services', url: 'https://normandinsystems.github.io/plumber-demo-example/', icon: 'droplets', tags: ['trades', 'repair'] },
+            { name: 'Auto Mechanic', url: 'https://normandinsystems.github.io/mechanic-demo-example/', icon: 'wrench', tags: ['auto', 'repair'] },
+            { name: 'Landscaping Pro', url: 'https://normandinsystems.github.io/Landscaper-demo-example/', icon: 'shrub', tags: ['outdoor', 'service'] },
+            { name: 'Fireworks Store', url: 'https://normandinsystems.github.io/Fireworks-demo-example/', icon: 'sparkles', tags: ['retail', 'event'] },
+            { name: 'Monument Services', url: 'https://normandinsystems.github.io/monument-demo-example/', icon: 'landmark', tags: ['stone', 'service'] },
+            { name: 'Pizza Shop', url: 'https://normandinsystems.github.io/pizza-shop-demo-example/', icon: 'pizza', tags: ['food', 'restaurant'] },
+            { name: 'Roofing Company', url: 'https://normandinsystems.github.io/Roofing-demo-example/', icon: 'home', tags: ['construction', 'exterior'] },
+            { name: 'Snow Removal', url: 'https://normandinsystems.github.io/Snow-Removal-Demo-Example/', icon: 'snowflake', tags: ['seasonal', 'outdoor'] },
+            { name: 'Pressure Washing', url: 'https://normandinsystems.github.io/Pressure-Washing-Demo-Example/', icon: 'spray-can', tags: ['cleaning', 'service'] },
+            { name: 'Arborist / Tree Care', url: 'https://normandinsystems.github.io/Arborists-Demo-Example/', icon: 'trees', tags: ['nature', 'service'] },
+            { name: 'Car Detailing', url: 'https://normandinsystems.github.io/Car-Detailing-Example/', icon: 'car', tags: ['auto', 'cleaning'] },
+            { name: 'Photography', url: 'https://normandinsystems.github.io/photography-demo-example/', icon: 'camera', tags: ['photography', 'service'] },
+        ];
+
+        // --- 2. LOGIC: Copy to Clipboard ---
+        function copyLink(url, btnElement) {
+            // Use modern clipboard API
+            const textArea = document.createElement("textarea");
+            textArea.value = url;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand("copy");
+            document.body.removeChild(textArea);
+
+            // Visual feedback
+            const originalIcon = btnElement.innerHTML;
+            btnElement.innerHTML = `<i data-lucide="check" class="w-4 h-4 text-green-600"></i>`;
+            btnElement.classList.add('bg-green-50');
+            lucide.createIcons();
+
+            setTimeout(() => {
+                btnElement.innerHTML = `<i data-lucide="link" class="w-4 h-4 text-slate-600"></i>`;
+                btnElement.classList.remove('bg-green-50');
+                lucide.createIcons();
+            }, 2000);
+        }
+
+        // --- 3. LOGIC: Guide Toggle ---
+        function toggleGuide() {
+            const guide = document.getElementById('sales-guide');
+            const chevron = document.getElementById('guide-chevron');
+            
+            if (guide.classList.contains('hidden')) {
+                guide.classList.remove('hidden');
+                chevron.style.transform = 'rotate(180deg)';
+            } else {
+                guide.classList.add('hidden');
+                chevron.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        // --- 4. RENDER: The Grid ---
+        function renderGallery(searchTerm = '') {
+            const grid = document.getElementById('gallery-grid');
+            const term = searchTerm.toLowerCase();
+
+            // Filter logic
+            const filtered = DEMO_SITES.filter(site => 
+                site.name.toLowerCase().includes(term) || 
+                site.tags.some(tag => tag.toLowerCase().includes(term))
+            );
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full py-20 text-center text-slate-400 fade-in">
+                        <i data-lucide="search-x" class="w-12 h-12 mx-auto mb-3 opacity-50"></i>
+                        <p class="text-lg">No demos found for "${searchTerm}"</p>
+                        <button onclick="document.getElementById('searchInput').value = ''; renderGallery();" class="mt-4 text-blue-600 font-medium hover:underline">Clear Search</button>
+                    </div>
+                `;
+            } else {
+                grid.innerHTML = filtered.map((site, index) => `
+                    <div class="demo-card bg-white rounded-xl border border-slate-200 overflow-hidden flex flex-col h-full group fade-in" style="animation-delay: ${index * 50}ms">
+                        
+                        <!-- Top Icon Area -->
+                        <div class="h-32 bg-slate-50 border-b border-slate-100 flex items-center justify-center relative group-hover:bg-blue-50/50 transition-colors">
+                            <i data-lucide="${site.icon}" class="w-12 h-12 text-slate-400 group-hover:text-blue-600 transition-colors duration-300 transform group-hover:scale-110"></i>
+                            
+                            <!-- Floating Copy Button -->
+                            <div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button onclick="copyLink('${site.url}', this)" class="bg-white p-2 rounded-full shadow-sm hover:shadow border border-slate-100 transition-all" title="Copy Link to Clipboard">
+                                    <i data-lucide="link" class="w-4 h-4 text-slate-600"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Content Area -->
+                        <div class="p-5 flex-1 flex flex-col">
+                            <!-- Tags -->
+                            <div class="flex items-center gap-2 mb-3">
+                                ${site.tags.slice(0, 2).map(tag => `
+                                    <span class="text-[10px] uppercase font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded tracking-wider">${tag}</span>
+                                `).join('')}
+                            </div>
+                            
+                            <h3 class="font-bold text-lg text-slate-900 mb-2 leading-tight">${site.name}</h3>
+                            <p class="text-xs text-slate-500 mb-4">Responsive vertical demo environment.</p>
+                            
+                            <!-- Action Button -->
+                            <div class="mt-auto pt-4 border-t border-slate-100">
+                                <a href="${site.url}" target="_blank" class="flex items-center justify-center gap-2 w-full bg-slate-900 text-white py-2.5 rounded-lg font-medium hover:bg-blue-700 transition-all shadow-sm hover:shadow-md group/btn">
+                                    <span>Launch Demo</span>
+                                    <i data-lucide="external-link" class="w-4 h-4 group-hover/btn:translate-x-0.5 transition-transform"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            // Re-initialize icons for new DOM elements
+            lucide.createIcons();
+        }
+
+        // --- 5. INITIALIZATION CHECK ---
+        // We run this AT THE END to ensure all functions/data above are defined
+        if (localStorage.getItem('ns_access_granted') === 'true') {
+            unlockUI();
+        }
+
+    </script>
+</body>
+
+</html>
